@@ -120,24 +120,69 @@ Doctor endpoints are public; everything else needs `Authorization: Bearer <token
 ### How to Run
 
 #### 1. Start the Backend
+
 In your PowerShell terminal:
+
 ```powershell
-cd backend
+cd "c:\Users\shruti shitole\Downloads\Hospital_Management_Project\Hospital_Management\backend"
 $env:DB_USER='root'
 $env:DB_PASSWORD='your_mysql_password'
 .\mvnw.cmd spring-boot:run
 ```
 
 #### 2. Start the Frontend
+
 In another terminal window:
+
 ```powershell
-cd frontend
+cd "c:\Users\shruti shitole\Downloads\Hospital_Management_Project\Hospital_Management\frontend"
 copy .env.local.example .env.local
 npm install
 npm run dev
 ```
 
 #### Demo Login
+
 Once open in your browser (http://localhost:3000):
+
 - **Email:** `demo@patient.com`
 - **Password:** `Password@123`
+
+## 4. Automated Testing
+
+The backend includes a comprehensive JUnit 5 and Mockito test suite in `backend/src/test` covering all core business logic and rules:
+
+```powershell
+cd backend
+.\mvnw.cmd test
+```
+
+### Verified Business Rules in Tests:
+- `testBookSuccess`: Booking a valid future slot flips slot status to `BOOKED` and writes an audit event to `appointment_history`.
+- `testBookSlotInPastThrowsBadRequest`: Enforces that past dates/times cannot be booked.
+- `testBookOccupiedSlotThrowsConflict`: Prevents double-booking already occupied doctor slots.
+- `testBookConflictingTimeThrowsConflict`: Blocks patients from booking multiple overlapping appointments.
+- `testRescheduleSuccess`: Atomically releases the original slot back to `AVAILABLE`, marks the new slot `BOOKED`, resets status to `PENDING` for re-approval, and logs a `RESCHEDULED` action.
+- `testCancelSuccess`: Releases the booked slot back to the schedule, updates status to `CANCELLED`, records the cancellation reason, and creates an audit entry.
+- `testListUpcomingAndPast`: Verifies chronological sorting and segregation of upcoming vs past appointments.
+
+---
+
+## 5. Key Screens & Screenshots
+
+All 11 key screen captures are archived in [`docs/screenshots`](docs/screenshots/):
+
+| # | Screen | Description | File |
+|---|---|---|---|
+| 1 | **Patient Registration** | Registration with input validation and demographic capture | [`01-register.png`](docs/screenshots/01-register.png) |
+| 2 | **Patient Login** | JWT authentication with pre-annotated demo credentials | [`02-login.png`](docs/screenshots/02-login.png) |
+| 3 | **Find Doctor** | Real-time search by name and interactive specialization filter chips | [`03-find-doctor.png`](docs/screenshots/03-find-doctor.png) |
+| 4 | **Doctor Details & Slots** | Doctor profile, consultation fees, and real-time schedule slot picker | [`04-doctor-slots.png`](docs/screenshots/04-doctor-slots.png) |
+| 5 | **Booking Confirmation** | Booking confirmation banner with reference code and summary details | [`05-booking-confirmation.png`](docs/screenshots/05-booking-confirmation.png) |
+| 6 | **Upcoming Appointments** | List of upcoming bookings with status badges and quick action controls | [`06-upcoming.png`](docs/screenshots/06-upcoming.png) |
+| 7 | **Past & Rejected Bookings** | Past appointments with callouts explaining doctor rejection / patient cancellation reasons | [`07-past-rejected.png`](docs/screenshots/07-past-rejected.png) |
+| 8 | **Reschedule Appointment** | Interface to choose an alternate time slot with the same doctor | [`08-reschedule.png`](docs/screenshots/08-reschedule.png) |
+| 9 | **Cancel Appointment** | Cancellation prompt with optional reason field | [`09-cancel.png`](docs/screenshots/09-cancel.png) |
+| 10 | **Appointment History** | Chronological audit trail showing every booking, reschedule, and cancellation | [`10-history.png`](docs/screenshots/10-history.png) |
+| 11 | **Patient Profile** | Profile management screen to view and update contact & health profile info | [`11-profile.png`](docs/screenshots/11-profile.png) |
+

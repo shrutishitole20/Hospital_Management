@@ -1,17 +1,22 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import StatusBadge from "@/components/StatusBadge";
 import { api } from "@/lib/api";
 import { useRequireAuth } from "@/lib/auth";
 import { fmtDate, fmtTime } from "@/lib/format";
 
-export default function AppointmentsPage() {
+function AppointmentsContent() {
   const { user, loading } = useRequireAuth();
-  const [tab, setTab] = useState("upcoming");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === "past" ? "past" : "upcoming";
+  const initialCancel = searchParams.get("cancel") ? parseInt(searchParams.get("cancel")) : null;
+
+  const [tab, setTab] = useState(initialTab);
   const [items, setItems] = useState(null);
   const [error, setError] = useState("");
-  const [cancelId, setCancelId] = useState(null);
+  const [cancelId, setCancelId] = useState(initialCancel);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -93,5 +98,13 @@ export default function AppointmentsPage() {
         </div>
       )}
     </>
+  );
+}
+
+export default function AppointmentsPage() {
+  return (
+    <Suspense fallback={<p className="muted">Loading…</p>}>
+      <AppointmentsContent />
+    </Suspense>
   );
 }

@@ -1,14 +1,88 @@
-# OS / editors
+# ==========================================
+# Operating System & IDE Files
+# ==========================================
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# IntelliJ IDEA
 .idea/
-.vscode/
 *.iml
+*.iws
+*.ipr
+out/
 
-# Backend
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+
+# Logs & Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# ==========================================
+# Backend (Java / Spring Boot / Maven)
+# ==========================================
 backend/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+backend/.mvn/timing.properties
+backend/.mvn/wrapper/maven-wrapper.jar
+hs_err_pid*
+replay_pid*
 
-# Frontend
+# ==========================================
+# Frontend (Next.js / Node.js)
+# ==========================================
 frontend/node_modules/
+node_modules/
 frontend/.next/
+.next/
+frontend/out/
+out/
+frontend/build/
+build/
+frontend/dist/
+dist/
+.turbo/
+.vercel/
+
+# Environment files & Secrets
+frontend/.env
 frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+.env
+.env*.local
+
+# Node Package Manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*

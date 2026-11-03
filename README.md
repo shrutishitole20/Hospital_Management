@@ -110,6 +110,23 @@ POST /api/appointments/{id}/cancel        body: { reason }
 
 Doctor endpoints are public; everything else needs `Authorization: Bearer <token>`.
 
+### Postman API Collection
+
+A complete, pre-configured Postman Collection with automated tests and dynamic authentication chaining is available in the repository:
+
+- **Direct Postman Import URL (Raw):**  
+  ```
+  https://raw.githubusercontent.com/shrutishitole20/Hospital_Management/main/Hospital_Management_APIs.postman_collection.json
+  ```
+- **GitHub Collection File:**  
+  [`Hospital_Management_APIs.postman_collection.json`](Hospital_Management_APIs.postman_collection.json)
+
+#### How to Import via Link in Postman:
+1. Open **Postman** and click **Import** (top left).
+2. Paste the **Direct Postman Import URL** above into the input box.
+3. Click **Import**.
+4. Run `POST Login (Demo Patient)` first to automatically set the `{{token}}` variable, or click **Run collection** to run all 24 requests and 42 assertions automatically.
+
 ## Troubleshooting
 
 - **"Cannot reach the server"**: backend is not running or `NEXT_PUBLIC_API_URL` is wrong.

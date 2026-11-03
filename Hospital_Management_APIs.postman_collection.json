@@ -1,0 +1,1131 @@
+{
+  "info": {
+    "_postman_id": "c9e8f1b4-2b63-4c91-bf92-74718b528e10",
+    "name": "Hospital Appointment Scheduling System (Patient Booking)",
+    "description": "Complete Postman API Collection for the Hospital Appointment Scheduling System - Patient Booking Module.\n\n### How to Run\n1. Ensure the backend is running at `http://localhost:8080`.\n2. Click on the collection name and click **Run** (or run requests sequentially).\n3. The **Login (Demo Patient)** request automatically extracts the JWT token and saves it to the collection variable `{{token}}`.\n4. All authenticated endpoints inherit `{{token}}` automatically.\n5. Doctor dates and slots dynamically populate `{{slotDate}}`, `{{slotId}}`, `{{newSlotId}}`, and `{{appointmentId}}` for automated end-to-end testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "slotDate",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "slotId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newSlotId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "appointmentId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "description": "Patient registration, login, and logout endpoints.",
+      "item": [
+        {
+          "name": "POST Login (Demo Patient)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Response contains JWT token', function () {",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "    pm.expect(jsonData.patient.email).to.eql('demo@patient.com');",
+                  "});",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('JWT Token saved to collection variable {{token}}');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@patient.com\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in the pre-seeded demo patient and auto-saves the JWT token to {{token}}."
+          }
+        },
+        {
+          "name": "POST Register New Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('New user registered with token', function () {",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "    pm.expect(jsonData.patient.fullName).to.eql('Postman Test User');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Test User\",\n  \"email\": \"postman_patient_1793707729345@example.com\",\n  \"password\": \"Password@123\",\n  \"phone\": \"9876543210\",\n  \"dateOfBirth\": \"1996-05-20\",\n  \"gender\": \"Female\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registers a new patient account."
+          }
+        },
+        {
+          "name": "POST Login (Invalid Password - 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@patient.com\",\n  \"password\": \"IncorrectPassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Negative test verifying 401 Unauthorized for incorrect credentials."
+          }
+        },
+        {
+          "name": "POST Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Explicit logout API step."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Doctors & Schedules (Public)",
+      "description": "Doctor directory search, specialization filters, available dates and schedule slots.",
+      "item": [
+        {
+          "name": "GET List All Doctors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns list of doctors', function () {",
+                  "    var arr = pm.response.json();",
+                  "    pm.expect(arr).to.be.an('array');",
+                  "    pm.expect(arr.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Search Doctors by Name (?q=Anita)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns matching doctors', function () {",
+                  "    var arr = pm.response.json();",
+                  "    pm.expect(arr.some(d => d.fullName.includes('Anita'))).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors?q=Anita",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Anita"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Filter Doctors by Specialization (?specialization=Dermatology)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('All returned doctors have Cardiology specialization', function () {",
+                  "    var arr = pm.response.json();",
+                  "    pm.expect(arr.every(d => d.specialization === 'Dermatology')).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors?specialization=Dermatology",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors"
+              ],
+              "query": [
+                {
+                  "key": "specialization",
+                  "value": "Dermatology"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Specializations List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Contains medical specializations', function () {",
+                  "    var list = pm.response.json();",
+                  "    pm.expect(list).to.include('Cardiology');",
+                  "    pm.expect(list).to.include('Dermatology');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/specializations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors",
+                "specializations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Doctor Details by ID (ID: 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var doc = pm.response.json();",
+                  "pm.test('Has consultation fee & qualification', function () {",
+                  "    pm.expect(doc.fullName).to.eql('Dr. Anita Deshmukh');",
+                  "    pm.expect(doc.consultationFee).to.eql(800.00);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Available Dates for Doctor (ID: 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var dates = pm.response.json();",
+                  "pm.test('Has available future dates', function () {",
+                  "    pm.expect(dates).to.be.an('array');",
+                  "    pm.expect(dates.length).to.be.above(0);",
+                  "});",
+                  "if (dates.length > 0) {",
+                  "    pm.collectionVariables.set('slotDate', dates[0]);",
+                  "    console.log('Set {{slotDate}} to', dates[0]);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/1/dates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors",
+                "1",
+                "dates"
+              ]
+            },
+            "description": "Fetches rolling future dates with available slots and auto-populates {{slotDate}}."
+          }
+        },
+        {
+          "name": "GET Available Slots for Date (?date={{slotDate}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var slots = pm.response.json();",
+                  "pm.test('Returns slots array', function () {",
+                  "    pm.expect(slots).to.be.an('array');",
+                  "});",
+                  "var free = slots.filter(s => s.available);",
+                  "if (free.length >= 2) {",
+                  "    pm.collectionVariables.set('slotId', free[0].id.toString());",
+                  "    pm.collectionVariables.set('newSlotId', free[1].id.toString());",
+                  "    console.log('Set {{slotId}} to', free[0].id, 'and {{newSlotId}} to', free[1].id);",
+                  "} else if (free.length === 1) {",
+                  "    pm.collectionVariables.set('slotId', free[0].id.toString());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/1/slots?date={{slotDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors",
+                "1",
+                "slots"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{slotDate}}"
+                }
+              ]
+            },
+            "description": "Fetches slots for the date and automatically binds available slots to {{slotId}} and {{newSlotId}}."
+          }
+        },
+        {
+          "name": "GET Past Date Slots (Bad Request - 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/1/slots?date=2020-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "doctors",
+                "1",
+                "slots"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2020-01-01"
+                }
+              ]
+            },
+            "description": "Business rule test: cannot view slots for past dates."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Patient Profile",
+      "description": "View and update demographic details of the authenticated patient.",
+      "item": [
+        {
+          "name": "GET Patient Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var p = pm.response.json();",
+                  "pm.test('Returns profile details', function () {",
+                  "    pm.expect(p.email).to.not.be.empty;",
+                  "    pm.expect(p.fullName).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patients/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patients",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT Update Patient Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var p = pm.response.json();",
+                  "pm.test('Profile updated successfully', function () {",
+                  "    pm.expect(p.bloodGroup).to.eql('B+');",
+                  "    pm.expect(p.address).to.eql('Kothrud, Pune');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Demo Patient\",\n  \"phone\": \"9876543210\",\n  \"dateOfBirth\": \"1995-06-15\",\n  \"gender\": \"Female\",\n  \"address\": \"Kothrud, Pune\",\n  \"bloodGroup\": \"B+\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/patients/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patients",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Appointments Management",
+      "description": "Booking, viewing, rescheduling, and cancelling appointments.",
+      "item": [
+        {
+          "name": "POST Book Appointment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test('Booking has reference code', function () {",
+                  "    pm.expect(data.appointment.referenceCode).to.include('APT-');",
+                  "    pm.expect(data.appointment.status).to.eql('PENDING');",
+                  "});",
+                  "if (data.appointment && data.appointment.id) {",
+                  "    pm.collectionVariables.set('appointmentId', data.appointment.id.toString());",
+                  "    console.log('Set {{appointmentId}} to', data.appointment.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slotId\": \"{{slotId}}\",\n  \"reason\": \"Routine health consultation via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ]
+            },
+            "description": "Books the selected slot and auto-binds {{appointmentId}}."
+          }
+        },
+        {
+          "name": "POST Double-Booking Same Slot (Conflict - 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 409 Conflict', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slotId\": \"{{slotId}}\",\n  \"reason\": \"Attempt to double book already taken slot\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ]
+            },
+            "description": "Business rule test: verifies pessimistic locking rejects double-booking."
+          }
+        },
+        {
+          "name": "GET List All Appointments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET List Upcoming Appointments (?type=upcoming)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var list = pm.response.json();",
+                  "pm.test('Only future/upcoming appointments returned', function () {",
+                  "    pm.expect(list.every(a => a.upcoming)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments?type=upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "upcoming"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET List Past Appointments (?type=past)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var list = pm.response.json();",
+                  "pm.test('Past appointments contain completed or rejected', function () {",
+                  "    pm.expect(list.some(a => a.status === 'COMPLETED' || a.status === 'REJECTED' || a.status === 'CANCELLED')).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments?type=past",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "past"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET View Appointment Details (ID: {{appointmentId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                "{{appointmentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT Reschedule Appointment (ID: {{appointmentId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test('Appointment slot moved and status is PENDING', function () {",
+                  "    pm.expect(data.appointment.status).to.eql('PENDING');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newSlotId\": \"{{newSlotId}}\",\n  \"reason\": \"Rescheduled via Postman collection test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/reschedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                "{{appointmentId}}",
+                "reschedule"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Cancel Appointment (ID: {{appointmentId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var data = pm.response.json();",
+                  "pm.test('Status updated to CANCELLED', function () {",
+                  "    pm.expect(data.status).to.eql('CANCELLED');",
+                  "    pm.expect(data.cancellationReason).to.eql('Cancelled by patient during Postman test');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Cancelled by patient during Postman test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                "{{appointmentId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Audit History",
+      "description": "Audit trail and event timelines for appointments.",
+      "item": [
+        {
+          "name": "GET Appointment History Timeline (ID: {{appointmentId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var hist = pm.response.json();",
+                  "pm.test('Timeline tracks lifecycle events', function () {",
+                  "    pm.expect(hist).to.be.an('array');",
+                  "    pm.expect(hist.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                "{{appointmentId}}",
+                "history"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Complete Account History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var hist = pm.response.json();",
+                  "pm.test('Patient has audit events', function () {",
+                  "    pm.expect(hist).to.be.an('array');",
+                  "    pm.expect(hist.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                "history"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

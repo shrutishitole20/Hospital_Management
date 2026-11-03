@@ -54,6 +54,9 @@ backend/.mvn/timing.properties
 backend/.mvn/wrapper/maven-wrapper.jar
 hs_err_pid*
 replay_pid*
+# Local properties override (application.properties remains tracked, ignore local overrides)
+**/application-local.properties
+**/application-dev-local.properties
 
 # ==========================================
 # Frontend (Next.js / Node.js)

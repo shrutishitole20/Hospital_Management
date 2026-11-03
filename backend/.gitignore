@@ -25,6 +25,10 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
+# Local properties override (application.properties remains tracked, ignore local overrides)
+application-local.properties
+application-dev-local.properties
+
 # Crash logs
 hs_err_pid*
 replay_pid*

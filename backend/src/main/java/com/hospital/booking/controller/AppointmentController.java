@@ -16,38 +16,45 @@ public class AppointmentController {
 
     public AppointmentController(AppointmentService service) { this.service = service; }
 
-    @PostMapping
+    private String patientEmail(Principal p) {
+        if (p == null || p.getName() == null || p.getName().isBlank()) {
+            throw new com.hospital.booking.exception.ApiException(HttpStatus.UNAUTHORIZED, "Please log in to continue.");
+        }
+        return p.getName();
+    }
+
+    @PostMapping(path = {"", "/", "/book", "/book/"})
     @ResponseStatus(HttpStatus.CREATED)
     public ConfirmationDto book(Principal p, @Valid @RequestBody BookRequest req) {
-        return service.book(p.getName(), req);
+        return service.book(patientEmail(p), req);
     }
 
     /** type = upcoming | past | all (default) */
-    @GetMapping
+    @GetMapping(path = {"", "/"})
     public List<AppointmentDto> list(Principal p, @RequestParam(defaultValue = "all") String type) {
-        return service.list(p.getName(), type);
+        return service.list(patientEmail(p), type);
     }
 
-    @GetMapping("/history")
-    public List<HistoryEventDto> allHistory(Principal p) { return service.allHistory(p.getName()); }
+    @GetMapping(path = {"/history", "/history/"})
+    public List<HistoryEventDto> allHistory(Principal p) { return service.allHistory(patientEmail(p)); }
 
-    @GetMapping("/{id}")
-    public AppointmentDto get(Principal p, @PathVariable Long id) { return service.get(p.getName(), id); }
+    @GetMapping(path = {"/{id}", "/{id}/"})
+    public AppointmentDto get(Principal p, @PathVariable Long id) { return service.get(patientEmail(p), id); }
 
-    @GetMapping("/{id}/history")
+    @GetMapping(path = {"/{id}/history", "/{id}/history/"})
     public List<HistoryEventDto> history(Principal p, @PathVariable Long id) {
-        return service.historyFor(p.getName(), id);
+        return service.historyFor(patientEmail(p), id);
     }
 
-    @PutMapping("/{id}/reschedule")
+    @PutMapping(path = {"/{id}/reschedule", "/{id}/reschedule/"})
     public ConfirmationDto reschedule(Principal p, @PathVariable Long id,
                                       @Valid @RequestBody RescheduleRequest req) {
-        return service.reschedule(p.getName(), id, req);
+        return service.reschedule(patientEmail(p), id, req);
     }
 
-    @PostMapping("/{id}/cancel")
+    @PostMapping(path = {"/{id}/cancel", "/{id}/cancel/"})
     public AppointmentDto cancel(Principal p, @PathVariable Long id,
                                  @RequestBody(required = false) @Valid CancelRequest req) {
-        return service.cancel(p.getName(), id, req);
+        return service.cancel(patientEmail(p), id, req);
     }
 }

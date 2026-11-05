@@ -14,11 +14,18 @@ public class PatientController {
 
     public PatientController(PatientService patients) { this.patients = patients; }
 
-    @GetMapping
-    public PatientDto me(Principal principal) { return patients.me(principal.getName()); }
+    private String patientEmail(Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new com.hospital.booking.exception.ApiException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Please log in to continue.");
+        }
+        return principal.getName();
+    }
 
-    @PutMapping
+    @GetMapping(path = {"", "/"})
+    public PatientDto me(Principal principal) { return patients.me(patientEmail(principal)); }
+
+    @PutMapping(path = {"", "/"})
     public PatientDto update(Principal principal, @Valid @RequestBody UpdateProfileRequest req) {
-        return patients.update(principal.getName(), req);
+        return patients.update(patientEmail(principal), req);
     }
 }

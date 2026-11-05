@@ -14,15 +14,15 @@ public class AuthController {
 
     public AuthController(AuthService auth) { this.auth = auth; }
 
-    @PostMapping("/register")
+    @PostMapping(path = {"/register", "/register/"})
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponse register(@Valid @RequestBody RegisterRequest req) { return auth.register(req); }
 
-    @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest req) { return auth.login(req); }
+    @PostMapping(path = {"/login", "/login/"})
+    public LoginResponse login(@Valid @RequestBody LoginRequest req) { return auth.login(req); }
 
     /** JWTs are stateless: the client discards its token. The endpoint exists so logout is an explicit API step. */
-    @PostMapping("/logout")
+    @PostMapping(path = {"/logout", "/logout/"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout() {}
 }

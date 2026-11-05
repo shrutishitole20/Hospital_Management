@@ -83,17 +83,16 @@ class ApiControllerTest {
     // --- 1. AuthController Endpoints ---
 
     @Test
-    @DisplayName("POST /api/auth/login returns 200 with JWT token")
+    @DisplayName("POST /api/auth/login returns 200 with message and JWT token")
     void testLoginEndpoint() throws Exception {
-        PatientDto patient = new PatientDto(1L, "Demo Patient", "demo@patient.com", null, null, null, null, null);
-        when(authService.login(any(LoginRequest.class))).thenReturn(new AuthResponse("jwt-token-xyz", patient));
+        when(authService.login(any(LoginRequest.class))).thenReturn(new LoginResponse("Login successful", "jwt-token-xyz"));
 
         authMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new LoginRequest("demo@patient.com", "Password@123"))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.token").value("jwt-token-xyz"))
-            .andExpect(jsonPath("$.patient.email").value("demo@patient.com"));
+            .andExpect(jsonPath("$.message").value("Login successful"))
+            .andExpect(jsonPath("$.token").value("jwt-token-xyz"));
     }
 
     @Test

@@ -43,11 +43,24 @@ public class AppointmentService {
     // ---------------------------------------------------------------- book
     @Transactional
     public ConfirmationDto book(String email, BookRequest req) {
+        if (req == null) {
+            throw ApiException.badRequest("Appointment booking details are required.");
+        }
         Patient patient = patientService.requirePatient(email);
-        TimeSlot slot = lockBookableSlot(req.slotId());
+        TimeSlot slot;
+        if (req.slotId() != null) {
+            slot = lockBookableSlot(req.slotId());
+        } else if (req.doctorId() != null && req.appointmentDate() != null && req.appointmentTime() != null) {
+            TimeSlot found = slots.findByDoctorIdAndSlotDateAndStartTime(req.doctorId(), req.appointmentDate(), req.appointmentTime())
+                .orElseThrow(() -> ApiException.notFound("That time slot does not exist."));
+            slot = lockBookableSlot(found.getId());
+        } else {
+            throw ApiException.badRequest("Please select an appointment time slot.");
+        }
+
         ensurePatientFree(patient.getId(), slot);
 
-        slot.setStatus(SlotStatus.BOOKED); // slot is now unavailable to everyone else
+        slot.setStatus(SlotStatus.BOOKED); // slot is now locked and unavailable to everyone else
 
         Appointment a = new Appointment();
         a.setReferenceCode(newReferenceCode());
@@ -63,7 +76,6 @@ public class AppointmentService {
         String msg = "Your appointment with " + slot.getDoctor().getFullName() + " is booked for "
             + Mapper.slotText(slot) + ". Reference: " + a.getReferenceCode()
             + ". It will be confirmed once the doctor approves it.";
-        // Stand-in for an email/SMS gateway. Replace with JavaMailSender if required.
         log.info("[CONFIRMATION to {}] {}", patient.getEmail(), msg);
         return new ConfirmationDto(msg, Mapper.appointment(a));
     }
@@ -162,7 +174,7 @@ public class AppointmentService {
         }
     }
 
-    /** Locks the slot row, then checks it is in the future and still free. */
+    /** Row lock so two patients cannot book the same slot at the same time. */
     private TimeSlot lockBookableSlot(Long slotId) {
         TimeSlot slot = slots.findByIdForUpdate(slotId)
             .orElseThrow(() -> ApiException.notFound("That time slot does not exist."));
@@ -170,7 +182,7 @@ public class AppointmentService {
             throw ApiException.badRequest("You cannot book a time in the past.");
         }
         if (slot.getStatus() != SlotStatus.AVAILABLE) {
-            throw ApiException.conflict("Sorry, that slot was just taken. Please pick another time.");
+            throw ApiException.conflict("Sorry, that slot was just taken. Please select another available time.");
         }
         return slot;
     }

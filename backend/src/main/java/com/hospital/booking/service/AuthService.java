@@ -41,11 +41,11 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse login(LoginRequest req) {
+    public LoginResponse login(LoginRequest req) {
         String email = req.email().trim().toLowerCase();
         Patient p = patients.findByEmail(email)
             .filter(x -> encoder.matches(req.password(), x.getPasswordHash()))
             .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Email or password is incorrect."));
-        return new AuthResponse(jwt.generateToken(email), Mapper.patient(p));
+        return new LoginResponse("Login successful", jwt.generateToken(email), Mapper.patient(p));
     }
 }

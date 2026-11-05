@@ -20,7 +20,12 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const res = await api("/auth/login", { method: "POST", body: { email, password } });
     setToken(res.token);
-    setUser(res.patient);
+    if (res.patient) {
+      setUser(res.patient);
+    } else {
+      const profile = await api("/patients/me");
+      setUser(profile);
+    }
   }, []);
 
   const register = useCallback(async (form) => {

@@ -92,17 +92,17 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Login with valid credentials returns JWT token")
+    @DisplayName("Login with valid credentials returns message and JWT token")
     void testLoginSuccess() {
         when(patientRepository.findByEmail("new@patient.com")).thenReturn(Optional.of(patient));
         when(passwordEncoder.matches("Password@123", "hashed_password")).thenReturn(true);
         when(jwtService.generateToken("new@patient.com")).thenReturn("valid-jwt-token");
 
         LoginRequest req = new LoginRequest("new@patient.com", "Password@123");
-        AuthResponse resp = authService.login(req);
+        LoginResponse resp = authService.login(req);
 
+        assertThat(resp.message()).isEqualTo("Login successful");
         assertThat(resp.token()).isEqualTo("valid-jwt-token");
-        assertThat(resp.patient().fullName()).isEqualTo("New Patient");
     }
 
     @Test

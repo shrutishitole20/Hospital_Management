@@ -4,6 +4,7 @@ import com.hospital.booking.model.SlotStatus;
 import com.hospital.booking.model.TimeSlot;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,8 +25,19 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
                                                 @Param("from") LocalDate from,
                                                 @Param("to") LocalDate to);
 
+    @Query("""
+        select s from TimeSlot s
+        where s.doctor.id = :doctorId and s.slotDate between :from and :to
+        order by s.slotDate, s.startTime
+        """)
+    List<TimeSlot> findByDoctorAndDateBetween(@Param("doctorId") Long doctorId,
+                                             @Param("from") LocalDate from,
+                                             @Param("to") LocalDate to);
+
     @Query("select s from TimeSlot s where s.doctor.id = :doctorId and s.slotDate = :date order by s.startTime")
     List<TimeSlot> findByDoctorAndDate(@Param("doctorId") Long doctorId, @Param("date") LocalDate date);
+
+    Optional<TimeSlot> findByDoctorIdAndSlotDateAndStartTime(Long doctorId, LocalDate slotDate, LocalTime startTime);
 
     /** Row lock so two patients cannot book the same slot at the same time. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 public final class Dtos {
     private Dtos() {}
@@ -19,6 +20,12 @@ public final class Dtos {
         String gender) {}
 
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {}
+
+    public record LoginResponse(String message, String token, PatientDto patient) {
+        public LoginResponse(String message, String token) {
+            this(message, token, null);
+        }
+    }
 
     public record AuthResponse(String token, PatientDto patient) {}
 
@@ -37,10 +44,38 @@ public final class Dtos {
     public record DoctorDto(Long id, String fullName, String specialization, String qualification,
                             Integer experienceYears, BigDecimal consultationFee, String about) {}
 
-    public record SlotDto(Long id, LocalDate date, LocalTime startTime, LocalTime endTime, boolean available) {}
+    public record SlotDto(Long id, LocalDate date, LocalTime startTime, LocalTime endTime, boolean available, String status) {
+        public SlotDto(Long id, LocalDate date, LocalTime startTime, LocalTime endTime, boolean available) {
+            this(id, date, startTime, endTime, available, available ? "AVAILABLE" : "BOOKED");
+        }
+    }
+
+    public record DayAvailabilityDto(
+        LocalDate date,
+        String status,
+        int totalSlots,
+        int availableSlots,
+        int bookedSlots
+    ) {}
+
+    public record MonthAvailabilityDto(
+        String month,
+        Long doctorId,
+        List<DayAvailabilityDto> days
+    ) {}
 
     // ---- appointments ----
-    public record BookRequest(@NotNull Long slotId, @Size(max = 500) String reason) {}
+    public record BookRequest(
+        Long slotId,
+        Long doctorId,
+        LocalDate appointmentDate,
+        LocalTime appointmentTime,
+        @Size(max = 500) String reason
+    ) {
+        public BookRequest(Long slotId, String reason) {
+            this(slotId, null, null, null, reason);
+        }
+    }
 
     public record RescheduleRequest(@NotNull Long newSlotId, @Size(max = 500) String reason) {}
 
